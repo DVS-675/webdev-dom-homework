@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Проект "Комменты"</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -8,7 +11,7 @@
   <body>
     <div class="container">
       <ul id="list" class="comments">
-        <li class="comment">
+        <li id="list-comment" class="comment">
           <div class="comment-header">
             <div>Глеб Фокин</div>
             <div>12.02.22 12:18</div>
@@ -25,7 +28,7 @@
             </div>
           </div>
         </li>
-        <li class="comment">
+        <li id="list-comment" class="comment">
           <div class="comment-header">
             <div>Варвара Н.</div>
             <div>13.02.22 19:22</div>
@@ -58,7 +61,9 @@
           rows="4"
         ></textarea>
         <div class="add-form-row">
-          <button id="add-button" class="add-form-button">Написать</button>
+          <button id="add-button" class="add-form-button">
+            Написать
+          </button>
           <button id="delete-button" class="add-form-button">
             Удалить комментарий
           </button>
@@ -73,6 +78,7 @@
     const listElement = document.getElementById("list");
     const nameInputElement = document.getElementById("name-input");
     const textInputElement = document.getElementById("text-input");
+    const mainForm = document.querySelector(".add-form");
 
     buttonElement.addEventListener("click", () => {
       nameInputElement.classList.remove("error");
@@ -96,7 +102,7 @@
       const oldListElement = listElement.innerHTML;
       listElement.innerHTML =
         oldListElement +
-        `<li class="comment">
+        `<li id = "list-comment" class="comment">
               <div class="comment-header">
                 <div>${nameInputElement.value}</div>
                 <div>${date}</div>
@@ -113,7 +119,39 @@
                 </div>
               </div>
             </li>`;
+      nameInputElement.value = "";
+      textInputElement.value = "";
     });
+
+    // блокировка кнопки
+
+  /*   const buttonBlock = () => {
+      document.querySelectorAll("#name-input,#text-input").forEach((el) => {
+        el.addEventListener("input", () => {
+          if (nameInputElement.value === "" || textInputElement.value === "")
+            buttonElement.disabled = true;
+          else buttonElement.disabled = false;
+        });
+      });
+    }; */
+
+    // ввод по кнопке enter
+
+    mainForm.addEventListener("keyup", (e) => {
+      if (e.code === "Enter") {
+        buttonElement.click();
+        nameInputElement.value = "";
+        textInputElement.value = "";
+      }
+    });
+
+    //удаление последнего комментария
+
+    deleteButtonElement.addEventListener("click", () => {
+      const element = document.querySelector("#list-comment:last-child");
+      element.remove();
+    });
+
     console.log("It works!");
   </script>
 </html>
