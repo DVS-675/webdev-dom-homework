@@ -61,9 +61,7 @@
           rows="4"
         ></textarea>
         <div class="add-form-row">
-          <button id="add-button" class="add-form-button">
-            Написать
-          </button>
+          <button id="add-button" class="add-form-button">Написать</button>
           <button id="delete-button" class="add-form-button">
             Удалить комментарий
           </button>
@@ -124,13 +122,15 @@
     });
 
     // блокировка кнопки
-
-  /*   const buttonBlock = () => {
+/* 
+    const buttonBlock = () => {
       document.querySelectorAll("#name-input,#text-input").forEach((el) => {
         el.addEventListener("input", () => {
-          if (nameInputElement.value === "" || textInputElement.value === "")
+          if (nameInputElement.value === "" || textInputElement.value === "") {
             buttonElement.disabled = true;
-          else buttonElement.disabled = false;
+          } else {
+            buttonElement.disabled = false;
+          }
         });
       });
     }; */
