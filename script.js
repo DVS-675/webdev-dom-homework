@@ -159,6 +159,7 @@ const renderComments = () => {
   listElement.innerHTML = commentsHtml;
 
   changeLikesListener();
+  deleteComment();
 };
 
 renderComments();
