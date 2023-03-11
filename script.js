@@ -26,12 +26,15 @@ const changeLikesListener = () => {
     buttonLikeElement.addEventListener("click", () => {
       const index = buttonLikeElement.dataset.index;
 
-      if (buttonLikeElement.className === "like-button") {
+      if (comments[index].liked === false) {
+        comments[index].liked === true;
         buttonLikeElement.classList.add("-active-like");
         comments[index].likes += 1;
-      } else if (buttonLikeElement.className === "like-button -active-like")
+      } else if (comments[index].liked === true) {
+        comments[index].liked === false;
         buttonLikeElement.classList.remove("-active-like");
-      comments[index].likes -= 1;
+        comments[index].likes -= 1;
+      }
       renderComments();
     });
   }
@@ -60,7 +63,8 @@ buttonElement.addEventListener("click", () => {
     name: nameInputElement.value,
     date: date,
     text: textInputElement.value,
-    likes: "0",
+    likes: 0,
+    liked: false,
   });
 
   renderComments();
@@ -94,11 +98,14 @@ mainForm.addEventListener("keyup", (e) => {
 });
 
 //удаление последнего комментария
-
-deleteButtonElement.addEventListener("click", () => {
-  const element = document.querySelector("#list-comment:last-child");
-  element.remove();
-});
+/* const deleteComment = () => {
+  const deleteButtonElement = document.getElementById("delete-button");
+  deleteButtonElement.addEventListener("click", () => {
+    const index = deleteButtonElement.dataset.index;
+    console.log(index);
+    renderComments();
+  });
+}; */
 
 //DOM 2
 
@@ -107,13 +114,15 @@ const comments = [
     name: "Глеб Фокин",
     date: "12.02.22 12:18",
     text: "Это будет первый комментарий на этой странице",
-    likes: "3",
+    likes: 3,
+    liked: false,
   },
   {
     name: "Варвара Н.",
     date: "13.02.22 19:22",
     text: "Мне нравится как оформлена эта страница! ❤",
-    likes: "75",
+    likes: 75,
+    liked: true,
   },
 ];
 
@@ -121,22 +130,22 @@ const renderComments = () => {
   const commentsHtml = comments
     .map((student, index) => {
       return `<li id = "list-comment" class="comment">
-        <div class="comment-header">
-          <div>${student.name}</div>
-          <div>${student.date}</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            ${student.text}
+          <div class="comment-header">
+            <div>${student.name}</div>
+            <div>${student.date}</div>
           </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">${student.likes}</span>
-            <button data-index = '${index}' class="like-button"></button>
+          <div class="comment-body">
+            <div class="comment-text">
+              ${student.text}
+            </div>
           </div>
-        </div>
-      </li>`;
+          <div class="comment-footer">
+            <div class="likes">
+              <span class="likes-counter">${student.likes}</span>
+              <button data-index = '${index}' class="like-button"></button>
+            </div>
+          </div>
+        </li>`;
     })
     .join("");
   listElement.innerHTML = commentsHtml;
