@@ -19,6 +19,8 @@ const mainForm = document.querySelector(".add-form");
   }
 }; */
 
+// Изменение лайков
+
 const changeLikesListener = () => {
   const buttonLikeElements = document.querySelectorAll(".like-button");
 
@@ -27,18 +29,18 @@ const changeLikesListener = () => {
       const index = buttonLikeElement.dataset.index;
 
       if (comments[index].liked === false) {
-        comments[index].liked === true;
-        buttonLikeElement.classList.add("-active-like");
+        comments[index].liked = true;
         comments[index].likes += 1;
       } else if (comments[index].liked === true) {
-        comments[index].liked === false;
-        buttonLikeElement.classList.remove("-active-like");
+        comments[index].liked = false;
         comments[index].likes -= 1;
       }
       renderComments();
     });
   }
 };
+
+//Добавление комментария
 
 buttonElement.addEventListener("click", () => {
   nameInputElement.classList.remove("error");
@@ -74,8 +76,8 @@ buttonElement.addEventListener("click", () => {
 });
 
 // блокировка кнопки
-/* 
-    const buttonBlock = () => {
+
+/*    const buttonBlock = () => {
       document.querySelectorAll("#name-input,#text-input").forEach((el) => {
         el.addEventListener("input", () => {
           if (nameInputElement.value === "" || textInputElement.value === "") {
@@ -98,14 +100,16 @@ mainForm.addEventListener("keyup", (e) => {
 });
 
 //удаление последнего комментария
-/* const deleteComment = () => {
+
+const deleteComment = () => {
   const deleteButtonElement = document.getElementById("delete-button");
+  const listElement = document.getElementById("list");
+
   deleteButtonElement.addEventListener("click", () => {
-    const index = deleteButtonElement.dataset.index;
-    console.log(index);
-    renderComments();
+    const element = listElement.lastChild;
+    element.remove();
   });
-}; */
+};
 
 //DOM 2
 
@@ -126,6 +130,8 @@ const comments = [
   },
 ];
 
+//рендер-функция
+
 const renderComments = () => {
   const commentsHtml = comments
     .map((student, index) => {
@@ -142,7 +148,9 @@ const renderComments = () => {
           <div class="comment-footer">
             <div class="likes">
               <span class="likes-counter">${student.likes}</span>
-              <button data-index = '${index}' class="like-button"></button>
+              <button data-index = '${index}' class="${
+        student.liked ? "like-button -active-like" : "like-button"
+      }"></button>
             </div>
           </div>
         </li>`;
