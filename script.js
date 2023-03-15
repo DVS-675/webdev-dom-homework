@@ -25,7 +25,8 @@ const changeLikesListener = () => {
   const buttonLikeElements = document.querySelectorAll(".like-button");
 
   for (const buttonLikeElement of buttonLikeElements) {
-    buttonLikeElement.addEventListener("click", () => {
+    buttonLikeElement.addEventListener("click", (event) => {
+      event.stopPropagation();
       const index = buttonLikeElement.dataset.index;
 
       if (comments[index].liked === false) {
@@ -62,9 +63,13 @@ buttonElement.addEventListener("click", () => {
   const date = new Date().toLocaleString("ru-RU", options);
 
   comments.push({
-    name: nameInputElement.value,
+    name: nameInputElement.value
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;"),
     date: date,
-    text: textInputElement.value,
+    text: textInputElement.value
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;"),
     likes: 0,
     liked: false,
   });
@@ -106,9 +111,21 @@ const deleteComment = () => {
   const listElement = document.getElementById("list");
 
   deleteButtonElement.addEventListener("click", () => {
-    const element = listElement.lastChild;
-    element.remove();
+    const deleteComment = document.querySelector("#list:last-child");
+    deleteComment.remove();
+    renderComments();
   });
+};
+
+const editComment = () => {
+  const comments = document.querySelectorAll(".comment");
+  const textInputElement = document.getElementById("text-input");
+  for (const comment of comments) {
+    comment.addEventListener("click", () => {
+      const textComment = comment.dataset.text;
+      textInputElement.value = textComment;
+    });
+  }
 };
 
 //DOM 2
@@ -135,7 +152,9 @@ const comments = [
 const renderComments = () => {
   const commentsHtml = comments
     .map((student, index) => {
-      return `<li id = "list-comment" class="comment">
+      return `<li data-text = '&gt${student.text} \n ${
+        student.name
+      }' class="comment">
           <div class="comment-header">
             <div>${student.name}</div>
             <div>${student.date}</div>
@@ -160,6 +179,7 @@ const renderComments = () => {
 
   changeLikesListener();
   deleteComment();
+  editComment();
 };
 
 renderComments();
