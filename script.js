@@ -81,18 +81,21 @@ buttonElement.addEventListener("click", () => {
 });
 
 // блокировка кнопки
-
-/*    const buttonBlock = () => {
-      document.querySelectorAll("#name-input,#text-input").forEach((el) => {
-        el.addEventListener("input", () => {
-          if (nameInputElement.value === "" || textInputElement.value === "") {
-            buttonElement.disabled = true;
-          } else {
-            buttonElement.disabled = false;
-          }
-        });
-      });
-    }; */
+const validateInput = () => {
+  if (nameInputElement.value === "" || textInputElement.value === "") {
+    buttonElement.disabled = true;
+  } else {
+    buttonElement.disabled = false;
+  }
+};
+const buttonBlock = () => {
+  validateInput();
+  document.querySelectorAll("#name-input,#text-input").forEach((el) => {
+    el.addEventListener("input", () => {
+      validateInput();
+    });
+  });
+};
 
 // ввод по кнопке enter
 
@@ -106,16 +109,16 @@ mainForm.addEventListener("keyup", (e) => {
 
 //удаление последнего комментария
 
-const deleteComment = () => {
+/* const deleteComment = () => {
   const deleteButtonElement = document.getElementById("delete-button");
-  const listElement = document.getElementById("list");
-
   deleteButtonElement.addEventListener("click", () => {
-    const deleteComment = document.querySelector("#list:last-child");
-    deleteComment.remove();
-    renderComments();
+    const liIndex = listElement.innerHTML.lastIndexOf("<li data-text");
+    listElement[liIndex].remove();
+    
   });
-};
+}; */
+
+// ответ на комментарии
 
 const editComment = () => {
   const comments = document.querySelectorAll(".comment");
@@ -152,7 +155,7 @@ const comments = [
 const renderComments = () => {
   const commentsHtml = comments
     .map((student, index) => {
-      return `<li data-text = '&gt${student.text} \n ${
+      return `<li data-text = '&gt ${student.text} \n ${
         student.name
       }' class="comment">
           <div class="comment-header">
@@ -178,10 +181,10 @@ const renderComments = () => {
   listElement.innerHTML = commentsHtml;
 
   changeLikesListener();
-  deleteComment();
+  /* deleteComment(); */
   editComment();
 };
 
 renderComments();
-
+buttonBlock();
 console.log("It works!");
