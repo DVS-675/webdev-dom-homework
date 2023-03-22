@@ -5,6 +5,47 @@ const nameInputElement = document.getElementById("name-input");
 const textInputElement = document.getElementById("text-input");
 const mainForm = document.querySelector(".add-form");
 
+
+//get запрос с сервера
+
+const fetchPromise = fetch(
+  "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
+  {
+    method: "GET",
+  }
+);
+
+fetchPromise.then((response) => {
+  console.log(response);
+
+  const jsonPromise = response.json();
+
+  jsonPromise.then((responseData) => {
+    const options = {
+      year: "2-digit",
+      month: "numeric",
+      day: "numeric",
+      timezone: "UTC",
+      hour: "numeric",
+      minute: "2-digit",
+    };
+    console.log(responseData);
+    const appComments = responseData.comments.map((comment) => {
+      return {
+        name: comment.author.name
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;"),
+        date: new Date(comment.date).toLocaleString("ru-RU", options),
+        text: comment.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
+        likes: comment.likes,
+        isLiked: false,
+      };
+    });
+    comments = appComments;
+    renderComments();
+  });
+});
+
 /* const changeLikesQuantity = () => {
   const buttonLikeElements = document.querySelectorAll(".like-button");
   const likesQuantity = document.querySelectorAll(".likes-counter");
@@ -29,11 +70,11 @@ const changeLikesListener = () => {
       event.stopPropagation();
       const index = buttonLikeElement.dataset.index;
 
-      if (comments[index].liked === false) {
-        comments[index].liked = true;
+      if (comments[index].isLiked === false) {
+        comments[index].isLiked = true;
         comments[index].likes += 1;
-      } else if (comments[index].liked === true) {
-        comments[index].liked = false;
+      } else if (comments[index].isLiked === true) {
+        comments[index].isLiked = false;
         comments[index].likes -= 1;
       }
       renderComments();
@@ -41,7 +82,7 @@ const changeLikesListener = () => {
   }
 };
 
-//Добавление комментария
+//Добавление комментария, POST запрос с GET
 
 buttonElement.addEventListener("click", () => {
   nameInputElement.classList.remove("error");
@@ -52,15 +93,15 @@ buttonElement.addEventListener("click", () => {
     textInputElement.classList.add("error");
     return;
   }
-  const options = {
+  /* const options = {
     year: "2-digit",
     month: "numeric",
     day: "numeric",
     timezone: "UTC",
     hour: "numeric",
     minute: "2-digit",
-  };
-  const date = new Date().toLocaleString("ru-RU", options);
+  }; */
+  /* const date = new Date().toLocaleString("ru-RU", options);
 
   comments.push({
     name: nameInputElement.value
@@ -72,6 +113,67 @@ buttonElement.addEventListener("click", () => {
       .replaceAll(">", "&gt;"),
     likes: 0,
     liked: false,
+  }); */
+
+  const fetchPromise = fetch(
+    "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        name: nameInputElement.value,
+        text: textInputElement.value,
+        date: new Date(),
+      }),
+    }
+  );
+
+  fetchPromise.then((response) => {
+    console.log(response);
+
+    const jsonPromise = response.json();
+
+    jsonPromise.then((responseData) => {
+      comments = responseData.todo;
+      renderComments();
+      const fetchPromise = fetch(
+        "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
+        { method: "GET" }
+      );
+
+      fetchPromise.then((response) => {
+        console.log(response);
+
+        const jsonPromise = response.json();
+
+        jsonPromise.then((responseData) => {
+          const options = {
+            year: "2-digit",
+            month: "numeric",
+            day: "numeric",
+            timezone: "UTC",
+            hour: "numeric",
+            minute: "2-digit",
+          };
+          console.log(responseData);
+
+          const appComments = responseData.comments.map((comment) => {
+            return {
+              name: comment.author.name
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;"),
+              date: new Date(comment.date).toLocaleString("ru-RU", options),
+              text: comment.text
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;"),
+              likes: comment.likes,
+              isLiked: false,
+            };
+          });
+          comments = appComments;
+          renderComments();
+        });
+      });
+    });
   });
 
   renderComments();
@@ -108,15 +210,12 @@ mainForm.addEventListener("keyup", (e) => {
 });
 
 //удаление последнего комментария
-
-/* const deleteComment = () => {
-  const deleteButtonElement = document.getElementById("delete-button");
+const deleteComment = () => {
   deleteButtonElement.addEventListener("click", () => {
-    const liIndex = listElement.innerHTML.lastIndexOf("<li data-text");
-    listElement[liIndex].remove();
-    
+    const elem = document.getElementById("list").lastChild;
+    elem.parentNode.removeChild(elem);
   });
-}; */
+};
 
 // ответ на комментарии
 
@@ -133,55 +232,42 @@ const editComment = () => {
 
 //DOM 2
 
-const comments = [
-  {
-    name: "Глеб Фокин",
-    date: "12.02.22 12:18",
-    text: "Это будет первый комментарий на этой странице",
-    likes: 3,
-    liked: false,
-  },
-  {
-    name: "Варвара Н.",
-    date: "13.02.22 19:22",
-    text: "Мне нравится как оформлена эта страница! ❤",
-    likes: 75,
-    liked: true,
-  },
-];
+let comments = [];
 
 //рендер-функция
 
 const renderComments = () => {
-  const commentsHtml = comments
-    .map((student, index) => {
-      return `<li data-text = '&gt ${student.text} \n ${
-        student.name
-      }' class="comment">
+  const commentsHtml =
+    comments &&
+    comments
+      .map((comment, index) => {
+        return `<li data-text = '&gt ${comment.text} \n ${
+          comment.name
+        }' class="comment">
           <div class="comment-header">
-            <div>${student.name}</div>
-            <div>${student.date}</div>
+            <div>${comment.name}</div>
+            <div>${comment.date}</div>
           </div>
           <div class="comment-body">
             <div class="comment-text">
-              ${student.text}
+              ${comment.text}
             </div>
           </div>
           <div class="comment-footer">
             <div class="likes">
-              <span class="likes-counter">${student.likes}</span>
+              <span class="likes-counter">${comment.likes}</span>
               <button data-index = '${index}' class="${
-        student.liked ? "like-button -active-like" : "like-button"
-      }"></button>
+          comment.isLiked ? "like-button -active-like" : "like-button"
+        }"></button>
             </div>
           </div>
         </li>`;
-    })
-    .join("");
+      })
+      .join("");
   listElement.innerHTML = commentsHtml;
 
   changeLikesListener();
-  /* deleteComment(); */
+  deleteComment();
   editComment();
 };
 
