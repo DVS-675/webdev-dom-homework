@@ -210,12 +210,12 @@ mainForm.addEventListener("keyup", (e) => {
 });
 
 //удаление последнего комментария
-const deleteComment = () => {
+/* const deleteComment = () => {
   deleteButtonElement.addEventListener("click", () => {
     const elem = document.getElementById("list").lastChild;
     elem.parentNode.removeChild(elem);
   });
-};
+}; */
 
 // ответ на комментарии
 
@@ -267,7 +267,7 @@ const renderComments = () => {
   listElement.innerHTML = commentsHtml;
 
   changeLikesListener();
-  deleteComment();
+  /* deleteComment(); */
   editComment();
 };
 
