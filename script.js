@@ -5,60 +5,46 @@ const nameInputElement = document.getElementById("name-input");
 const textInputElement = document.getElementById("text-input");
 const mainForm = document.querySelector(".add-form");
 
+//GET запрос с сервера
+const fetchGetAndRender = () => {
+  console.log("Данные загружаются...");
+  return fetch(
+    "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
+    {
+      method: "GET",
+    }
+  )
+    .then((response) => {
+      console.log(response);
 
-//get запрос с сервера
+      return response.json();
+    })
 
-const fetchPromise = fetch(
-  "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
-  {
-    method: "GET",
-  }
-);
-
-fetchPromise.then((response) => {
-  console.log(response);
-
-  const jsonPromise = response.json();
-
-  jsonPromise.then((responseData) => {
-    const options = {
-      year: "2-digit",
-      month: "numeric",
-      day: "numeric",
-      timezone: "UTC",
-      hour: "numeric",
-      minute: "2-digit",
-    };
-    console.log(responseData);
-    const appComments = responseData.comments.map((comment) => {
-      return {
-        name: comment.author.name
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;"),
-        date: new Date(comment.date).toLocaleString("ru-RU", options),
-        text: comment.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
-        likes: comment.likes,
-        isLiked: false,
+    .then((responseData) => {
+      const options = {
+        year: "2-digit",
+        month: "numeric",
+        day: "numeric",
+        timezone: "UTC",
+        hour: "numeric",
+        minute: "2-digit",
       };
+      console.log(responseData);
+      const appComments = responseData.comments.map((comment) => {
+        return {
+          name: comment.author.name
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;"),
+          date: new Date(comment.date).toLocaleString("ru-RU", options),
+          text: comment.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
+          likes: comment.likes,
+          isLiked: false,
+        };
+      });
+      comments = appComments;
+      renderComments();
     });
-    comments = appComments;
-    renderComments();
-  });
-});
-
-/* const changeLikesQuantity = () => {
-  const buttonLikeElements = document.querySelectorAll(".like-button");
-  const likesQuantity = document.querySelectorAll(".likes-counter");
-  let like = true;
-
-  for (const buttonLikeElement of buttonLikeElements) {
-    buttonLikeElement.addEventListener("click", () => {
-      likesQuantity = like ? ++likesQuantity : --likesQuantity;
-      like = !like;
-      document.querySelectorAll(".likes-counter").innerHTML = likesQuantity;
-    });
-  }
-}; */
+};
 
 // Изменение лайков
 
@@ -93,88 +79,28 @@ buttonElement.addEventListener("click", () => {
     textInputElement.classList.add("error");
     return;
   }
-  /* const options = {
-    year: "2-digit",
-    month: "numeric",
-    day: "numeric",
-    timezone: "UTC",
-    hour: "numeric",
-    minute: "2-digit",
-  }; */
-  /* const date = new Date().toLocaleString("ru-RU", options);
+  buttonElement.disabled = true;
+  buttonElement.textContent = "Загружаю...";
+  fetch("https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments", {
+    method: "POST",
+    body: JSON.stringify({
+      name: nameInputElement.value,
+      text: textInputElement.value,
+      date: new Date(),
+    }),
+  })
+    .then((response) => {
+      console.log(response);
+      return response.json();
+    })
 
-  comments.push({
-    name: nameInputElement.value
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;"),
-    date: date,
-    text: textInputElement.value
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;"),
-    likes: 0,
-    liked: false,
-  }); */
-
-  const fetchPromise = fetch(
-    "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        name: nameInputElement.value,
-        text: textInputElement.value,
-        date: new Date(),
-      }),
-    }
-  );
-
-  fetchPromise.then((response) => {
-    console.log(response);
-
-    const jsonPromise = response.json();
-
-    jsonPromise.then((responseData) => {
-      comments = responseData.todo;
-      renderComments();
-      const fetchPromise = fetch(
-        "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
-        { method: "GET" }
-      );
-
-      fetchPromise.then((response) => {
-        console.log(response);
-
-        const jsonPromise = response.json();
-
-        jsonPromise.then((responseData) => {
-          const options = {
-            year: "2-digit",
-            month: "numeric",
-            day: "numeric",
-            timezone: "UTC",
-            hour: "numeric",
-            minute: "2-digit",
-          };
-          console.log(responseData);
-
-          const appComments = responseData.comments.map((comment) => {
-            return {
-              name: comment.author.name
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;"),
-              date: new Date(comment.date).toLocaleString("ru-RU", options),
-              text: comment.text
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;"),
-              likes: comment.likes,
-              isLiked: false,
-            };
-          });
-          comments = appComments;
-          renderComments();
-        });
-      });
+    .then(() => {
+      return fetchGetAndRender();
+    })
+    .then(() => {
+      buttonElement.disabled = false;
+      buttonElement.textContent = "Написать";
     });
-  });
 
   renderComments();
 
@@ -270,7 +196,7 @@ const renderComments = () => {
   /* deleteComment(); */
   editComment();
 };
-
+fetchGetAndRender();
 renderComments();
 buttonBlock();
 console.log("It works!");
