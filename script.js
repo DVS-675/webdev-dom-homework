@@ -4,10 +4,11 @@ const listElement = document.getElementById("list");
 const nameInputElement = document.getElementById("name-input");
 const textInputElement = document.getElementById("text-input");
 const mainForm = document.querySelector(".add-form");
-
+const addCommentText = document.getElementById("addingComment");
+const waitCommentMessage = document.getElementById("waitComment");
 //GET запрос с сервера
+waitCommentMessage.style.display = "inline";
 const fetchGetAndRender = () => {
-  console.log("Данные загружаются...");
   return fetch(
     "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
     {
@@ -41,6 +42,7 @@ const fetchGetAndRender = () => {
           isLiked: false,
         };
       });
+      waitCommentMessage.style.display = "none";
       comments = appComments;
       renderComments();
     });
@@ -79,6 +81,8 @@ buttonElement.addEventListener("click", () => {
     textInputElement.classList.add("error");
     return;
   }
+  addCommentText.style.display = "inline";
+  mainForm.style.display = "none";
   buttonElement.disabled = true;
   buttonElement.textContent = "Загружаю...";
   fetch("https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments", {
@@ -98,6 +102,8 @@ buttonElement.addEventListener("click", () => {
       return fetchGetAndRender();
     })
     .then(() => {
+      addCommentText.style.display = "none";
+      mainForm.style.display = "flex";
       buttonElement.disabled = false;
       buttonElement.textContent = "Написать";
     });
