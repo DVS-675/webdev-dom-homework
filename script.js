@@ -16,9 +16,11 @@ const fetchGetAndRender = () => {
     }
   )
     .then((response) => {
-      console.log(response);
-
-      return response.json();
+      if (response.status === 201 || response.status === 200) {
+        return response.json();
+      } else {
+        return Promise.reject("Сервер упал");
+      }
     })
 
     .then((responseData) => {
@@ -45,6 +47,15 @@ const fetchGetAndRender = () => {
       waitCommentMessage.style.display = "none";
       comments = appComments;
       renderComments();
+    })
+    .catch((error) => {
+      waitCommentMessage.style.display = "none";
+      if (error === "Сервер упал") {
+        alert("Сервер сломался, попробуй позже");
+      } else {
+        alert("Кажется, у вас сломался интернет, попробуйте позже");
+      }
+      console.warn(error);
     });
 };
 
@@ -91,11 +102,17 @@ buttonElement.addEventListener("click", () => {
       name: nameInputElement.value,
       text: textInputElement.value,
       date: new Date(),
+      forceError: true,
     }),
   })
     .then((response) => {
-      console.log(response);
-      return response.json();
+      if (response.status === 201) {
+        return response.json();
+      } else if (response.status === 400) {
+        return Promise.reject("Короткий текст");
+      } else if (response.status === 500) {
+        return Promise.reject("Сервер упал");
+      }
     })
 
     .then(() => {
@@ -106,12 +123,25 @@ buttonElement.addEventListener("click", () => {
       mainForm.style.display = "flex";
       buttonElement.disabled = false;
       buttonElement.textContent = "Написать";
+      nameInputElement.value = "";
+      textInputElement.value = "";
+    })
+    .catch((error) => {
+      addCommentText.style.display = "none";
+      mainForm.style.display = "flex";
+      buttonElement.disabled = false;
+      buttonElement.textContent = "Написать";
+      if (error === "Короткий текст") {
+        alert("Имя и комментарий должны быть не короче 3 символов");
+      } else if (error === "Сервер упал") {
+        alert("Сервер сломался, попробуй позже");
+      } else {
+        alert("Кажется, у вас сломался интернет, попробуйте позже");
+      }
+      console.warn(error);
     });
 
   renderComments();
-
-  nameInputElement.value = "";
-  textInputElement.value = "";
 });
 
 // блокировка кнопки
