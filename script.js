@@ -4,20 +4,60 @@ const listElement = document.getElementById("list");
 const nameInputElement = document.getElementById("name-input");
 const textInputElement = document.getElementById("text-input");
 const mainForm = document.querySelector(".add-form");
+const addCommentText = document.getElementById("addingComment");
+const waitCommentMessage = document.getElementById("waitComment");
+//GET запрос с сервера
+waitCommentMessage.style.display = "inline";
+const fetchGetAndRender = () => {
+  return fetch(
+    "https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments",
+    {
+      method: "GET",
+    }
+  )
+    .then((response) => {
+      if (response.status === 201 || response.status === 200) {
+        return response.json();
+      } else {
+        return Promise.reject("Сервер упал");
+      }
+    })
 
-/* const changeLikesQuantity = () => {
-  const buttonLikeElements = document.querySelectorAll(".like-button");
-  const likesQuantity = document.querySelectorAll(".likes-counter");
-  let like = true;
-
-  for (const buttonLikeElement of buttonLikeElements) {
-    buttonLikeElement.addEventListener("click", () => {
-      likesQuantity = like ? ++likesQuantity : --likesQuantity;
-      like = !like;
-      document.querySelectorAll(".likes-counter").innerHTML = likesQuantity;
+    .then((responseData) => {
+      const options = {
+        year: "2-digit",
+        month: "numeric",
+        day: "numeric",
+        timezone: "UTC",
+        hour: "numeric",
+        minute: "2-digit",
+      };
+      console.log(responseData);
+      const appComments = responseData.comments.map((comment) => {
+        return {
+          name: comment.author.name
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;"),
+          date: new Date(comment.date).toLocaleString("ru-RU", options),
+          text: comment.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
+          likes: comment.likes,
+          isLiked: false,
+        };
+      });
+      waitCommentMessage.style.display = "none";
+      comments = appComments;
+      renderComments();
+    })
+    .catch((error) => {
+      waitCommentMessage.style.display = "none";
+      if (error === "Сервер упал") {
+        alert("Сервер сломался, попробуй позже");
+      } else {
+        alert("Кажется, у вас сломался интернет, попробуйте позже");
+      }
+      console.warn(error);
     });
-  }
-}; */
+};
 
 // Изменение лайков
 
@@ -29,11 +69,11 @@ const changeLikesListener = () => {
       event.stopPropagation();
       const index = buttonLikeElement.dataset.index;
 
-      if (comments[index].liked === false) {
-        comments[index].liked = true;
+      if (comments[index].isLiked === false) {
+        comments[index].isLiked = true;
         comments[index].likes += 1;
-      } else if (comments[index].liked === true) {
-        comments[index].liked = false;
+      } else if (comments[index].isLiked === true) {
+        comments[index].isLiked = false;
         comments[index].likes -= 1;
       }
       renderComments();
@@ -41,7 +81,7 @@ const changeLikesListener = () => {
   }
 };
 
-//Добавление комментария
+//Добавление комментария, POST запрос с GET
 
 buttonElement.addEventListener("click", () => {
   nameInputElement.classList.remove("error");
@@ -52,32 +92,56 @@ buttonElement.addEventListener("click", () => {
     textInputElement.classList.add("error");
     return;
   }
-  const options = {
-    year: "2-digit",
-    month: "numeric",
-    day: "numeric",
-    timezone: "UTC",
-    hour: "numeric",
-    minute: "2-digit",
-  };
-  const date = new Date().toLocaleString("ru-RU", options);
+  addCommentText.style.display = "inline";
+  mainForm.style.display = "none";
+  buttonElement.disabled = true;
+  buttonElement.textContent = "Загружаю...";
+  fetch("https://webdev-hw-api.vercel.app/api/v1/dmitrii-vasin/comments", {
+    method: "POST",
+    body: JSON.stringify({
+      name: nameInputElement.value,
+      text: textInputElement.value,
+      date: new Date(),
+      forceError: true,
+    }),
+  })
+    .then((response) => {
+      if (response.status === 201) {
+        return response.json();
+      } else if (response.status === 400) {
+        return Promise.reject("Короткий текст");
+      } else if (response.status === 500) {
+        return Promise.reject("Сервер упал");
+      }
+    })
 
-  comments.push({
-    name: nameInputElement.value
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;"),
-    date: date,
-    text: textInputElement.value
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;"),
-    likes: 0,
-    liked: false,
-  });
+    .then(() => {
+      return fetchGetAndRender();
+    })
+    .then(() => {
+      addCommentText.style.display = "none";
+      mainForm.style.display = "flex";
+      buttonElement.disabled = false;
+      buttonElement.textContent = "Написать";
+      nameInputElement.value = "";
+      textInputElement.value = "";
+    })
+    .catch((error) => {
+      addCommentText.style.display = "none";
+      mainForm.style.display = "flex";
+      buttonElement.disabled = false;
+      buttonElement.textContent = "Написать";
+      if (error === "Короткий текст") {
+        alert("Имя и комментарий должны быть не короче 3 символов");
+      } else if (error === "Сервер упал") {
+        alert("Сервер сломался, попробуй позже");
+      } else {
+        alert("Кажется, у вас сломался интернет, попробуйте позже");
+      }
+      console.warn(error);
+    });
 
   renderComments();
-
-  nameInputElement.value = "";
-  textInputElement.value = "";
 });
 
 // блокировка кнопки
@@ -108,13 +172,10 @@ mainForm.addEventListener("keyup", (e) => {
 });
 
 //удаление последнего комментария
-
 /* const deleteComment = () => {
-  const deleteButtonElement = document.getElementById("delete-button");
   deleteButtonElement.addEventListener("click", () => {
-    const liIndex = listElement.innerHTML.lastIndexOf("<li data-text");
-    listElement[liIndex].remove();
-    
+    const elem = document.getElementById("list").lastChild;
+    elem.parentNode.removeChild(elem);
   });
 }; */
 
@@ -133,58 +194,45 @@ const editComment = () => {
 
 //DOM 2
 
-const comments = [
-  {
-    name: "Глеб Фокин",
-    date: "12.02.22 12:18",
-    text: "Это будет первый комментарий на этой странице",
-    likes: 3,
-    liked: false,
-  },
-  {
-    name: "Варвара Н.",
-    date: "13.02.22 19:22",
-    text: "Мне нравится как оформлена эта страница! ❤",
-    likes: 75,
-    liked: true,
-  },
-];
+let comments = [];
 
 //рендер-функция
 
 const renderComments = () => {
-  const commentsHtml = comments
-    .map((student, index) => {
-      return `<li data-text = '&gt ${student.text} \n ${
-        student.name
-      }' class="comment">
+  const commentsHtml =
+    comments &&
+    comments
+      .map((comment, index) => {
+        return `<li data-text = '&gt ${comment.text} \n ${
+          comment.name
+        }' class="comment">
           <div class="comment-header">
-            <div>${student.name}</div>
-            <div>${student.date}</div>
+            <div>${comment.name}</div>
+            <div>${comment.date}</div>
           </div>
           <div class="comment-body">
             <div class="comment-text">
-              ${student.text}
+              ${comment.text}
             </div>
           </div>
           <div class="comment-footer">
             <div class="likes">
-              <span class="likes-counter">${student.likes}</span>
+              <span class="likes-counter">${comment.likes}</span>
               <button data-index = '${index}' class="${
-        student.liked ? "like-button -active-like" : "like-button"
-      }"></button>
+          comment.isLiked ? "like-button -active-like" : "like-button"
+        }"></button>
             </div>
           </div>
         </li>`;
-    })
-    .join("");
+      })
+      .join("");
   listElement.innerHTML = commentsHtml;
 
   changeLikesListener();
   /* deleteComment(); */
   editComment();
 };
-
+fetchGetAndRender();
 renderComments();
 buttonBlock();
 console.log("It works!");

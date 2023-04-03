@@ -10,10 +10,13 @@
 
   <body>
     <div class="container">
+      <p id = 'waitComment' style="display: none">Комментарии загружаются...</p>
       <ul id="list" class="comments">
         <!-- Список рендерится из JS -->
       </ul>
+      <p id = 'addingComment' style="display: none">Комментарий добавляется...</p>
       <div class="add-form">
+        
         <input
           type="text"
           id="name-input"
@@ -29,7 +32,7 @@
         ></textarea>
         <div class="add-form-row">
           <button id="add-button" class="add-form-button">Написать</button>
-          <button id="delete-button" class="add-form-button">
+          <button data-id = 'id' id="delete-button" class="add-form-button">
             Удалить комментарий
           </button>
         </div>
