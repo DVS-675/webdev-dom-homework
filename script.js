@@ -30,10 +30,13 @@ export const fetchGetAndRender = () => {
           text: comment.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
           likes: comment.likes,
           isLiked: false,
+          id: comment.id,
         };
       });
       waitCommentMessage.style.display = "none";
       comments = appComments;
+
+      console.log(comments[comments.length - 1].id);
       renderComments();
     })
     .catch((error) => {
@@ -102,11 +105,12 @@ export const renderComments = () => {
               <div class="add-form">
               
               <input
-                style='pointer-events:none;background-color:#c2bcbc;'
+                
                 type="text"
                 id="name-input"
                 class="add-form-name"
-                placeholder=''
+                placeholder="Введите ваше имя"
+                
               />
               <textarea
                 type="textarea"
@@ -156,7 +160,7 @@ export const renderComments = () => {
       date: new Date(),
       forceError: true,
       token,
-      id,
+      
     })
       .then(() => {
         return fetchGetAndRender();
@@ -239,21 +243,27 @@ export const renderComments = () => {
   //удаление последнего комментария
 
   function deleteComment(token) {
-    fetch("https://webdev-hw-api.vercel.app/api/v2/dmitrii-vasin/comments/" + comments.id, {
-      method: "DELETE",
-      headers: {
-        authorization: token,
-      },
-    }).then((response) => {
-      if (response.status === 200) {
-        comments.pop();
-        renderComments();
+    console.log(token);
+    console.log(comments[comments.length - 1].id);
+    return fetch(
+      "https://webdev-hw-api.vercel.app/api/v2/dmitrii-vasin/comments/" +
+        comments[comments.length - 1].id,
+      {
+        method: "DELETE",
+
+        headers: {
+          authorization: token,
+        },
       }
+    ).then((response) => {
+      comments.pop();
+      renderComments();
+      return response.json();
     });
   }
 
   deleteButtonElement.addEventListener("click", () => {
-    deleteComment();
+    deleteComment(token);
   });
 
   // ответ на комментарии
@@ -270,7 +280,7 @@ export const renderComments = () => {
   };
 
   changeLikesListener();
-  deleteComment();
+
   editComment();
   buttonBlock();
 };

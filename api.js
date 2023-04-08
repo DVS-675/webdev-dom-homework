@@ -1,5 +1,4 @@
 const host = "https://webdev-hw-api.vercel.app/api/v2/dmitrii-vasin/comments";
-let token = "Bearer asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k";
 
 export function getComments() {
   return fetch(host, {
@@ -13,7 +12,7 @@ export function getComments() {
   });
 }
 
-export function publicComment({ id, name, text, date, forceError, token }) {
+export function publicComment({ name, text, date, forceError, token }) {
   return fetch(host, {
     method: "POST",
     body: JSON.stringify({
@@ -21,7 +20,6 @@ export function publicComment({ id, name, text, date, forceError, token }) {
       text,
       date,
       forceError,
-      id,
     }),
     headers: {
       Authorization: token,
