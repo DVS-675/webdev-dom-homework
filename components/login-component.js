@@ -1,6 +1,7 @@
 import { loginUser, registerUser } from "../api.js";
 
 export function renderLoginComponent({
+  setName,
   appEl,
   comments,
   setToken,
@@ -90,7 +91,6 @@ export function renderLoginComponent({
     appEl.innerHTML = appHtml;
 
     document.getElementById("login-button").addEventListener("click", () => {
-        
       if (isLoginMode) {
         const login = document.getElementById("login-input").value;
         const password = document.getElementById("password-input").value;
@@ -110,6 +110,7 @@ export function renderLoginComponent({
         })
           .then((user) => {
             setToken(`Bearer ${user.user.token}`);
+            setName(user.user.name)
             renderComments();
           })
           .catch((error) => {
@@ -119,7 +120,7 @@ export function renderLoginComponent({
         const name = document.getElementById("name-input").value;
         const login = document.getElementById("login-input").value;
         const password = document.getElementById("password-input").value;
-
+        
         if (!name) {
           alert("Введите имя");
           return;
@@ -147,7 +148,9 @@ export function renderLoginComponent({
           .catch((error) => {
             alert(error.message);
           });
+          setName(name);
       }
+      
     });
 
     document.getElementById("toggle-button").addEventListener("click", () => {

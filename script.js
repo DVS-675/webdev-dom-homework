@@ -1,9 +1,9 @@
-import { getComments, publicComment } from "./api.js";
+import { getComments, publicComment, registerUser } from "./api.js";
 import { renderLoginComponent } from "./components/login-component.js";
 
 let comments = [];
-let token = "Bearer asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k";
-token = null;
+let writeOrDownload = true;
+let token = null;
 
 //get запрос
 
@@ -57,6 +57,9 @@ export const renderComments = () => {
 
   if (!token) {
     renderLoginComponent({
+      setName: (newName) => {
+        name = newName;
+      },
       comments,
       appEl,
       setToken: (newToken) => {
@@ -110,7 +113,7 @@ export const renderComments = () => {
                 id="name-input"
                 class="add-form-name"
                 placeholder="Введите ваше имя"
-                
+                value = "${name}" disabled
               />
               <textarea
                 type="textarea"
@@ -120,7 +123,9 @@ export const renderComments = () => {
                 rows="4"
               ></textarea>
               <div class="add-form-row">
-                <button id="add-button" class="add-form-button">Написать</button>
+                <button id="add-button" class="add-form-button">${
+                  writeOrDownload ? "Написать" : "Загружаю..."
+                }</button>
                 <button data-id = 'id' id="delete-button" class="add-form-button">
                   Удалить комментарий
                 </button>
@@ -131,6 +136,7 @@ export const renderComments = () => {
   appEl.innerHTML = appHtml;
 
   const buttonElement = document.getElementById("add-button");
+
   const deleteButtonElement = document.getElementById("delete-button");
   const listElement = document.getElementById("list");
   const nameInputElement = document.getElementById("name-input");
@@ -141,6 +147,7 @@ export const renderComments = () => {
   //Добавление комментария, POST запрос с GET
 
   buttonElement.addEventListener("click", () => {
+    console.log(buttonElement);
     nameInputElement.classList.remove("error");
     textInputElement.classList.remove("error");
 
@@ -152,7 +159,7 @@ export const renderComments = () => {
     addCommentText.style.display = "inline";
     mainForm.style.display = "none";
     buttonElement.disabled = true;
-    buttonElement.textContent = "Загружаю...";
+    writeOrDownload = !writeOrDownload;    
 
     publicComment({
       name: nameInputElement.value,
@@ -160,7 +167,6 @@ export const renderComments = () => {
       date: new Date(),
       forceError: true,
       token,
-      
     })
       .then(() => {
         return fetchGetAndRender();
@@ -168,16 +174,17 @@ export const renderComments = () => {
       .then(() => {
         addCommentText.style.display = "none";
         mainForm.style.display = "flex";
-        buttonElement.disabled = false;
-        buttonElement.textContent = "Написать";
+        buttonElement.disabled = false;        
+        writeOrDownload = true;        
         nameInputElement.value = "";
         textInputElement.value = "";
+        renderComments();
       })
       .catch((error) => {
         addCommentText.style.display = "none";
         mainForm.style.display = "flex";
         buttonElement.disabled = false;
-        buttonElement.textContent = "Написать";
+        writeOrdownload = true;
         if (error === "Короткий текст") {
           alert("Имя и комментарий должны быть не короче 3 символов");
         } else if (error === "Сервер упал") {
