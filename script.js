@@ -161,6 +161,7 @@ export const renderComments = () => {
     buttonElement.disabled = true;
     writeOrDownload = !writeOrDownload;    
 
+    
     publicComment({
       name: nameInputElement.value,
       text: textInputElement.value,
