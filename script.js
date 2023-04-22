@@ -1,5 +1,6 @@
 import { getComments, publicComment, registerUser } from "./api.js";
 import { renderLoginComponent } from "./components/login-component.js";
+import { format } from "date-fns";
 
 let comments = [];
 let writeOrDownload = true;
@@ -22,11 +23,15 @@ export const fetchGetAndRender = () => {
       };
 
       const appComments = responseData.comments.map((comment) => {
+        const createDate = format(
+          new Date(comment.date),
+          "yyyy-MM-dd hh.mm.ss"
+        );
         return {
           name: comment.author.name
             .replaceAll("<", "&lt;")
             .replaceAll(">", "&gt;"),
-          date: new Date(comment.date).toLocaleString("ru-RU", options),
+          date: createDate,
           text: comment.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
           likes: comment.likes,
           isLiked: false,
@@ -159,9 +164,8 @@ export const renderComments = () => {
     addCommentText.style.display = "inline";
     mainForm.style.display = "none";
     buttonElement.disabled = true;
-    writeOrDownload = !writeOrDownload;    
+    writeOrDownload = false;
 
-    
     publicComment({
       name: nameInputElement.value,
       text: textInputElement.value,
@@ -175,8 +179,8 @@ export const renderComments = () => {
       .then(() => {
         addCommentText.style.display = "none";
         mainForm.style.display = "flex";
-        buttonElement.disabled = false;        
-        writeOrDownload = true;        
+        buttonElement.disabled = false;
+        writeOrDownload = true;
         nameInputElement.value = "";
         textInputElement.value = "";
         renderComments();
@@ -185,7 +189,7 @@ export const renderComments = () => {
         addCommentText.style.display = "none";
         mainForm.style.display = "flex";
         buttonElement.disabled = false;
-        writeOrdownload = true;
+        writeOrDownload = true;
         if (error === "Короткий текст") {
           alert("Имя и комментарий должны быть не короче 3 символов");
         } else if (error === "Сервер упал") {
@@ -194,6 +198,7 @@ export const renderComments = () => {
           alert("Кажется, у вас сломался интернет, попробуйте позже");
         }
         console.warn(error);
+        renderComments();
       });
 
     renderComments();

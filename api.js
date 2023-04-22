@@ -1,5 +1,7 @@
 const host = "https://webdev-hw-api.vercel.app/api/v2/dmitrii-vasin/comments";
 
+
+
 export function getComments() {
   return fetch(host, {
     method: "GET",
